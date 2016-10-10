@@ -39,18 +39,18 @@ module.exports = (function() {
   }
 
   // Use Coupon
-  var use = function(code, userOption) {
+  var use = function(code, userInfo) {
     var found = coupons.find(function(coupon){
       return coupon.code == code;
     });
     // console.log('found', found)
 
     if (found) {
-      isValidate = validator(found, userOption)
+      isValidate = validator(found, userInfo)
       if (isValidate) {
 
         decreaseLimit(found)
-        addUsageList(found, userOption)
+        addUsageList(found, userInfo)
 
         return {
           msg: 'OK'
@@ -76,17 +76,17 @@ module.exports = (function() {
     }
   }
 
-  var addUsageList = function(coupon, userOption) {
-    if (userOption && userOption.name) {
+  var addUsageList = function(coupon, userInfo) {
+    if (userInfo && userInfo.name) {
       if (!coupon.usageList) {
-        coupon.usageList = [userOption.name]
+        coupon.usageList = [userInfo.name]
       } else {
-        coupon.usageList.push(userOption.name)
+        coupon.usageList.push(userInfo.name)
       }
     }
   }
 
-  var validator = function(coupon, userOption) {
+  var validator = function(coupon, userInfo) {
     validatefunctions = [
       limitValidator,
       countryValidator,
@@ -95,13 +95,13 @@ module.exports = (function() {
     ]
 
     result = validatefunctions.every(function(fn){
-      return fn(coupon, userOption)
+      return fn(coupon, userInfo)
     })
 
     return result
   }
 
-  var limitValidator = function(coupon, userOption) {
+  var limitValidator = function(coupon, userInfo) {
     if ( !coupon.option || typeof coupon.option.limit == 'undefined') {
       return true
     } else {
@@ -114,11 +114,11 @@ module.exports = (function() {
   }
 
 
-  var countryValidator = function(coupon, userOption) {
+  var countryValidator = function(coupon, userInfo) {
     if ( !coupon.option || typeof coupon.option.userZone == 'undefined') {
       return true
     } else {
-      if (coupon.option.userZone == userOption.userZone) {
+      if (coupon.option.userZone == userInfo.userZone) {
         return true;
       } else {
         return false;
@@ -127,7 +127,7 @@ module.exports = (function() {
   }
 
 
-  var expireValidator = function(coupon, userOption) {
+  var expireValidator = function(coupon, userInfo) {
     if ( !coupon.option || typeof coupon.option.expire == 'undefined') {
       return true
     } else {
@@ -139,7 +139,7 @@ module.exports = (function() {
     }
   }
 
-  var repeatValidator = function(coupon, userOption) {
+  var repeatValidator = function(coupon, userInfo) {
     if ( !coupon.option || typeof coupon.option.repeat == 'undefined') {
       return true
     } else {
@@ -147,7 +147,7 @@ module.exports = (function() {
         return true;
       } else {
         foundUser = coupon.usageList.find(function(used) {
-          return used == userOption.name
+          return used == userInfo.name
         })
         if (foundUser) {
           return false;
